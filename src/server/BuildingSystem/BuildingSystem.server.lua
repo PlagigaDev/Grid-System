@@ -14,10 +14,12 @@ local Grids = {}
 
 PhysicsService:RegisterCollisionGroup("Ground")
 
-function isValidPlacement(grid, xPos, zPos, width, height)
+function isValidPlacement(grid, xPos, zPos, object)
+    local width = object:GetAttribute("width")
+    local height = object:GetAttribute("height")
     for x = xPos, xPos+width-1 do
         for z = zPos, zPos+height-1 do
-            if not grid:getValueXZ(x, z):isEmpty() then return false end
+            if not grid:getValueXZ(x, z):isEmpty(object:GetAttribute("objectType")) then return false end
         end
     end
     return true
@@ -28,7 +30,7 @@ function setGridValues(grid, xPos, zPos, object)
     local height = object:GetAttribute("height")
     for x = xPos, xPos+width-1 do
         for z = zPos, zPos+height-1 do
-           grid:getValueXZ(x, z).main = object.Name
+           grid:getValueXZ(x, z).tile[object:GetAttribute("objectType")].value = object.Name
         end
     end
 end
@@ -50,7 +52,7 @@ function getPlacementObject(objectName: string): Folder
 end
 
 function requestPlacementXZ(grid, object: Folder, xPos: number, zPos: number): boolean
-    if isValidPlacement(grid, xPos, zPos, object:GetAttribute("width"), object:GetAttribute("height")) then
+    if isValidPlacement(grid, xPos, zPos, object) then
         placeObject(grid, xPos, zPos, object)
         return true
     end
@@ -65,7 +67,7 @@ end
 
 function addPlayer(player: Player)
     Grids[player.Name] = {}
-    Grids[player.Name]["0"] = Grid.new(50,50,4,CFrame.new() * CFrame.Angles(0,45,0))
+    Grids[player.Name]["0"] = Grid.new(50,50,4,CFrame.new() * Workspace.Pivot.CFrame)
     local grid = Grids[player.Name]["0"]
     for x = 0, grid.width-1 do
         for z = 0, grid.height-1 do
