@@ -85,8 +85,42 @@ function Grid.new(width: number, height: number, cellSize, pivot: CFrame): {}
     local self = setmetatable({["width"] = width, ["height"] = height, ["cellSize"] = cellSize, ["pivot"] = pivot, ["gridArray"] = {}}, Grid)
     self.groundPart = createGroundPart(self)
     --spawnDebugParts(self)
-
+    for i = 1, width do
+        self.gridArray[i] = {}
+    end
     return self
+end
+
+function Grid.fill(self, value: any)
+    for i = 1, self.width do
+        for j = 1, self.height do
+            self.gridArray[i][j] = value
+        end
+    end
+end
+
+function Grid.isValid(self, x: number, z: number): boolean
+    return (x < self.width and z < self.height)
+end
+
+function Grid.setValueXZ(self, x: number, z: number, value: any)
+    if not self:isValid(x, z) then return end
+    self.gridArray[x+1][z+1] = value
+end
+
+function Grid.setValuePosition(self, worldPosition: Vector3, value: number)
+    local x, z = self:getXZByWorldPosition(worldPosition)
+    self:setValueXZ(x, z, value)
+end
+
+function Grid.getValueXZ(self, x: number, z: number): any
+    if not self:isValid(x, z) then return end
+    return self.gridArray[x+1][z+1]
+end
+
+function Grid.getValuePosition(self, worldPosition: Vector3): any
+    local x, z = self:getXZByWorldPosition(worldPosition)
+    return self:getValueXZ(x, z)
 end
 
 return Grid
