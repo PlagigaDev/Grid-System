@@ -87,14 +87,27 @@ function Grid.new(width: number, height: number, cellSize, pivot: CFrame): {}
     --spawnDebugParts(self)
     for i = 1, width do
         self.gridArray[i] = {}
+        for j = 1, height do
+            self.gridArray[i][j] = 0
+        end
     end
     return self
 end
 
+function Grid.from(grid: {}): {}
+    return setmetatable(grid, Grid)
+end
+
 function Grid.fill(self, value: any)
-    for i = 1, self.width do
-        for j = 1, self.height do
-            self.gridArray[i][j] = value
+    self:forEach(function(x, z)
+        self.gridArray[x][z] = value
+    end)
+end
+
+function Grid.forEach(self, func: (gridPosition))
+    for x = 1, self.width do
+        for z = 1, self.height do
+            func(x, z)
         end
     end
 end

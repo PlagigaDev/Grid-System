@@ -4,26 +4,21 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 
-local GridFolder = script.Parent:WaitForChild("Grid")
+local BuildingSystemsFolder = ReplicatedStorage:WaitForChild("Common"):WaitForChild("Building")
+
+local GridFolder = BuildingSystemsFolder:WaitForChild("Grid")
 local Grid = require(GridFolder:WaitForChild("Grid"))
 local GridObject = require(GridFolder:WaitForChild("GridObject"))
 
-local Placement = ServerStorage:WaitForChild("Placement")
+local BuildingEvents = ReplicatedStorage:WaitForChild("BuildingEvents")
+local PlacementEvent = BuildingEvents:WaitForChild("Placement")
+local GridRequestEvent = BuildingEvents:WaitForChild("GridRequest")
+
+local PlacementInfo = ReplicatedStorage:WaitForChild("PlacementInfo")
+
+local isValidPlacement = require(BuildingSystemsFolder:WaitForChild("ValidPlacement"))
 
 local Grids = {}
-
-PhysicsService:RegisterCollisionGroup("Ground")
-
-function isValidPlacement(grid, xPos, zPos, object)
-    local width = object:GetAttribute("width")
-    local height = object:GetAttribute("height")
-    for x = xPos, xPos+width-1 do
-        for z = zPos, zPos+height-1 do
-            if not grid:getValueXZ(x, z):isEmpty(object:GetAttribute("objectType")) then return false end
-        end
-    end
-    return true
-end
 
 function setGridValues(grid, xPos, zPos, object)
     local width = object:GetAttribute("width")
@@ -48,7 +43,7 @@ function getGrid(player: Player, floor: number): Grid
 end
 
 function getPlacementObject(objectName: string): Folder
-    return Placement:FindFirstChild(objectName)
+    return PlacementInfo:FindFirstChild(objectName)
 end
 
 function requestPlacementXZ(grid, object: Folder, xPos: number, zPos: number): boolean
@@ -69,11 +64,11 @@ function addPlayer(player: Player)
     Grids[player.Name] = {}
     Grids[player.Name]["0"] = Grid.new(50,50,4,CFrame.new() * Workspace.Pivot.CFrame)
     local grid = Grids[player.Name]["0"]
-    for x = 0, grid.width-1 do
-        for z = 0, grid.height-1 do
-            grid:setValueXZ(x, z, GridObject.new(x, z))
-        end
-    end
+    
+    grid:forEach(function(x, z)
+        grid.gridArray[x][z] = GridObject.new(x, z)
+    end)
+    print(grid)
 end
 
 for _, player in Players:GetPlayers() do
@@ -83,10 +78,12 @@ end
 Players.PlayerAdded:Connect(addPlayer)
 
 
-ReplicatedStorage.RemoteEvent.OnServerEvent:Connect(function(player, pos)
-    if requestPlacementPosition(player, 0, "Drawer", pos) then
-        print("haha")
-    else
-        print("nah")
+PlacementEvent.OnServerEvent:Connect(function(player, pos, objectName)
+    if requestPlacementPosition(player, 0, objectName, pos) then
+        GridRequestEvent:FireClient(player, getGrid(player, 0))
     end
+end)
+
+GridRequestEvent.OnServerEvent:Connect(function(player: Player, floor: number)
+    GridRequestEvent:FireClient(player, getGrid(player, floor))
 end)
