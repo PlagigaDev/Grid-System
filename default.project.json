@@ -6,6 +6,15 @@
     "ReplicatedStorage": {
       "Common": {
         "$path": "src/shared"
+      },
+      "BuildingEvents": {
+        "$className": "Folder",
+          "Placement": {
+            "$className": "RemoteEvent"
+          },
+          "GridRequest": {
+            "$className": "RemoteEvent"
+          }
       }
     },
 

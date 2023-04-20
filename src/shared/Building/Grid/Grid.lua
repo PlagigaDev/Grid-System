@@ -112,8 +112,9 @@ function Grid.forEach(self, func: (gridPosition))
     end
 end
 
+
 function Grid.isValid(self, x: number, z: number): boolean
-    return (x < self.width and z < self.height)
+    return (x >= 0 and x < self.width and z >= 0 and z < self.height)
 end
 
 function Grid.setValueXZ(self, x: number, z: number, value: any)
