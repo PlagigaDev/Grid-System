@@ -8,7 +8,7 @@ To build the place from scratch, use:
 rojo build -o "Grid System.rbxlx"
 ```
 
-Next, open `Hotel Tycoon.rbxlx` in Roblox Studio and start the Rojo server:
+Next, open `Grid System.rbxlx` in Roblox Studio and start the Rojo server:
 
 ```bash
 rojo serve
